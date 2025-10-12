@@ -1,0 +1,25 @@
+# Email Configuration
+smtp_server: "smtp.gmail.com"
+smtp_port: 587
+email_user: "{{ vault_email_user }}"
+email_pass: "{{ vault_email_pass }}"
+alert_recipient: "{{ vault_alert_recipient }}"
+
+# AWS Configuration
+aws_access_key_id: "{{ vault_aws_access_key_id }}"
+aws_secret_access_key: "{{ vault_aws_secret_access_key }}"
+aws_region: "{{ vault_aws_region }}"
+
+patch_reboot_required: false
+patch_autoremove: true
+patch_update_cache: true
+
+max_days_without_update: 30
+critical_packages:
+  - openssl
+  - openssh-server
+  - kernel
+  - sudo
+
+report_title: "Security Patch Compliance Report"
+company_name: "My_company"
