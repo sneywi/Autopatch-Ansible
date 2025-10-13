@@ -1,6 +1,6 @@
 ---
 - name: Check patch compliance and generate report
-  hosts: env_Dev
+  hosts: env_Development
   become: true
   gather_facts: true
 
