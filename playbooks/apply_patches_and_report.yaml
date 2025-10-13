@@ -1,6 +1,6 @@
 ---
 - name: Check current patch status
-  hosts: env_Dev
+  hosts: env_Development
   become: true
   gather_facts: true
 
