@@ -1,0 +1,24 @@
+---
+- name: Check patch compliance and generate report
+  hosts: env_Dev
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Display playbook start message
+      debug:
+        msg: "Starting patch compliance check for {{ inventory_hostname }}"
+
+    - name: Include check_updates role
+      include_role:
+        name: check_updates
+
+- name: Generate and send compliance report
+  hosts: localhost
+  gather_facts: true
+
+  tasks:
+    - name: Include report role
+      include_role:
+        name: report
+
