@@ -1,3 +1,82 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for report
+- name: Aggregate patch metrics from all hosts
+  set_fact:
+    all_patch_metrics: >-
+      {{
+        hostvars |
+        dict2items |
+        selectattr('value.patch_metrics', 'defined') |
+        map(attribute='value.patch_metrics') |
+        list
+      }}
+  run_once: true
+
+- name: Calculate compliance statistics
+  set_fact:
+    compliance_stats:
+      total_hosts: "{{ all_patch_metrics | length }}"
+      compliant_count: "{{ all_patch_metrics | selectattr('compliance_status', 'equalto', 'compliant') | list | length }}"
+      pending_count: "{{ all_patch_metrics | selectattr('compliance_status', 'equalto', 'pending') | list | length }}"
+      critical_count: "{{ all_patch_metrics | selectattr('compliance_status', 'equalto', 'critical') | list | length }}"
+      patched_count: "{{ all_patch_metrics | selectattr('compliance_status', 'equalto', 'patched') | list | length }}"
+      total_updates_needed: "{{ all_patch_metrics | map(attribute='total_updates') | map('int') | sum }}"
+      total_security_updates: "{{ all_patch_metrics | map(attribute='security_updates') | map('int') | sum }}"
+  run_once: true
+
+- name: Calculate compliance percentage
+  set_fact:
+    compliance_percentage: >-
+      {{
+        ((compliance_stats.compliant_count | int + compliance_stats.patched_count | int) * 100.0 / 
+        (compliance_stats.total_hosts | int if compliance_stats.total_hosts | int > 0 else 1)) | round(1)
+      }}
+  run_once: true
+
+- name: Set report timestamp
+  set_fact:
+    report_timestamp: "{{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+    report_date: "{{ ansible_date_time.date }}"
+    report_time: "{{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}"
+  run_once: true
+
+- name: Generate HTML report
+  template:
+    src: "{{ playbook_dir }}/../templates/patch_report.html.j2"
+    dest: "/tmp/patch_report_{{ ansible_date_time.epoch }}.html"
+  delegate_to: localhost
+  run_once: true
+  register: html_report
+
+- name: Send compliance report via email
+  mail:
+    host: "{{ smtp_server }}"
+    port: "{{ smtp_port }}"
+    username: "{{ email_user }}"
+    password: "{{ email_pass }}"
+    to: "{{ alert_recipient }}"
+    subject: "🔒 {{ report_title }} - {{ report_date }} ({{ compliance_percentage }}% Compliant)"
+    body: "{{ lookup('template', playbook_dir + '/../templates/patch_report.html.j2') }}"
+    subtype: html
+  delegate_to: localhost
+  run_once: true
+  register: email_result
+
+- name: Display report summary
+  debug:
+    msg: |
+      ====================================
+      PATCH COMPLIANCE SUMMARY
+      ====================================
+      Total Hosts: {{ compliance_stats.total_hosts }}
+      ✅ Compliant: {{ compliance_stats.compliant_count }}
+      🔶 Pending Updates: {{ compliance_stats.pending_count }}
+      🔴 Critical: {{ compliance_stats.critical_count }}
+      ✨ Patched: {{ compliance_stats.patched_count }}
+      
+      Overall Compliance: {{ compliance_percentage }}%
+      Total Updates Needed: {{ compliance_stats.total_updates_needed }}
+      Security Updates: {{ compliance_stats.total_security_updates }}
+      
+      Report sent to: {{ alert_recipient }}
+      ====================================
+  run_once: true
