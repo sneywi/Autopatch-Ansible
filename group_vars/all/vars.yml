@@ -22,4 +22,3 @@ critical_packages:
   - sudo
 
 report_title: "Security Patch Compliance Report"
-company_name: "My_company"
