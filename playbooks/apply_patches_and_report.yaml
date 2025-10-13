@@ -1,0 +1,63 @@
+---
+- name: Check current patch status
+  hosts: env_Dev
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Display playbook start message
+      debug:
+        msg: "Starting patch application for {{ inventory_hostname }}"
+
+    - name: Include check_updates role
+      include_role:
+        name: check_updates
+
+- name: Apply patches to systems requiring updates
+  hosts: env_Dev
+  become: true
+  gather_facts: false
+  serial: 2
+
+  tasks:
+    - name: Show current patch status
+      debug:
+        msg: |
+          Host: {{ inventory_hostname }}
+          Current Status: {{ patch_metrics.compliance_status }}
+          Updates Available: {{ patch_metrics.total_updates }}
+          Security Updates: {{ patch_metrics.security_updates }}
+
+    - name: Apply patches if updates are available
+      include_role:
+        name: apply_patches
+      when: patch_metrics.total_updates | int > 0
+
+    - name: Wait for system to stabilize after patching
+      wait_for:
+        timeout: 30
+      delegate_to: localhost
+      when: patch_metrics.patches_applied | default(false)
+
+    - name: Re-check compliance status after patching
+      include_role:
+        name: check_updates
+      when: patch_metrics.patches_applied | default(false)
+
+- name: Generate and send post-patch compliance report
+  hosts: localhost
+  gather_facts: true
+
+  tasks:
+    - name: Include report role
+      include_role:
+        name: report
+
+    - name: Display completion message
+      debug:
+        msg: |
+          ========================================
+          Patch deployment completed successfully!
+          Email report sent to: {{ alert_recipient }}
+          ========================================
+
