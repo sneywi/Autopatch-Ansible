@@ -1,0 +1,2 @@
+- import_playbook: check_and_report.yaml
+- import_playbook: apply_patches_and_report.yaml
