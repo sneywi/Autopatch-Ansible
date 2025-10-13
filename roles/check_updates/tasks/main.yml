@@ -1,3 +1,113 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for check_updates
+- name: Update apt cache (Debian/Ubuntu)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+  changed_when: false
+
+- name: Update yum cache (RedHat/CentOS)
+  yum:
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+  changed_when: false
+
+- name: Check for available updates (Debian/Ubuntu)
+  shell: |
+    apt list --upgradable 2>/dev/null | grep -v "Listing" | wc -l
+  register: updates_available_deb
+  when: ansible_os_family == "Debian"
+  changed_when: false
+
+- name: Check for available updates (RedHat/CentOS)
+  shell: |
+    yum list updates -q | grep -v "Updated Packages" | wc -l
+  register: updates_available_rhel
+  when: ansible_os_family == "RedHat"
+  changed_when: false
+
+- name: Get security updates count (Debian/Ubuntu)
+  shell: |
+    apt list --upgradable 2>/dev/null | grep -i "security" | wc -l
+  register: security_updates_deb
+  when: ansible_os_family == "Debian"
+  changed_when: false
+
+- name: Get security updates count (RedHat/CentOS)
+  shell: |
+    yum updateinfo list security 2>/dev/null | grep -i "security" | wc -l
+  register: security_updates_rhel
+  when: ansible_os_family == "RedHat"
+  changed_when: false
+
+- name: Check last update time
+  stat:
+    path: /var/lib/apt/periodic/update-success-stamp
+  register: last_update_stat
+  when: ansible_os_family == "Debian"
+
+- name: Calculate days since last update
+  set_fact:
+    days_since_update: "{{ ((ansible_date_time.epoch | int) - (last_update_stat.stat.mtime | default(0) | int)) / 86400 | int }}"
+  when: 
+    - ansible_os_family == "Debian"
+    - last_update_stat.stat.exists | default(false)
+
+- name: Set days since update to high value if never updated
+  set_fact:
+    days_since_update: 999
+  when: >
+    ansible_os_family == "Debian" and 
+    (not last_update_stat.stat.exists | default(false))
+
+- name: Check for critical package updates
+  shell: |
+    apt list --upgradable 2>/dev/null | grep -E "{{ critical_packages | join('|') }}" | wc -l
+  register: critical_updates_count
+  when: ansible_os_family == "Debian"
+  changed_when: false
+
+- name: Determine compliance status
+  set_fact:
+    compliance_status: >-
+      {%- if ansible_os_family == "Debian" -%}
+        {%- if updates_available_deb.stdout | int == 0 -%}
+          compliant
+        {%- elif security_updates_deb.stdout | int > 0 or critical_updates_count.stdout | int > 0 -%}
+          critical
+        {%- else -%}
+          pending
+        {%- endif -%}
+      {%- elif ansible_os_family == "RedHat" -%}
+        {%- if updates_available_rhel.stdout | int == 0 -%}
+          compliant
+        {%- elif security_updates_rhel.stdout | int > 0 -%}
+          critical
+        {%- else -%}
+          pending
+        {%- endif -%}
+      {%- endif -%}
+
+- name: Set patch metrics fact
+  set_fact:
+    patch_metrics:
+      hostname: "{{ inventory_hostname }}"
+      ip_address: "{{ ansible_default_ipv4.address | default('N/A') }}"
+      os_family: "{{ ansible_os_family }}"
+      os_distribution: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+      total_updates: "{{ updates_available_deb.stdout | default(updates_available_rhel.stdout) | default('0') }}"
+      security_updates: "{{ security_updates_deb.stdout | default(security_updates_rhel.stdout) | default('0') }}"
+      critical_updates: "{{ critical_updates_count.stdout | default('0') }}"
+      days_since_update: "{{ days_since_update | default('N/A') }}"
+      compliance_status: "{{ compliance_status }}"
+      last_checked: "{{ ansible_date_time.iso8601 }}"
+
+- name: Display patch status
+  debug:
+    msg: |
+      Host: {{ inventory_hostname }}
+      Status: {{ compliance_status | upper }}
+      Total Updates: {{ patch_metrics.total_updates }}
+      Security Updates: {{ patch_metrics.security_updates }}
+      Days Since Update: {{ patch_metrics.days_since_update }}
+
