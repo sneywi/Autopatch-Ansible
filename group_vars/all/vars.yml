@@ -20,5 +20,3 @@ critical_packages:
   - openssh-server
   - kernel
   - sudo
-
-report_title: "Security Patch Compliance Report"
