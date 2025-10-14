@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    .compliance-score {
+      background: white;
+      margin: 30px 40px;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .score-circle {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #10b981 0% {{ compliance_percentage }}%,
+        #e5e7eb {{ compliance_percentage }}% 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .score-circle::before {
+      content: '';
+      width: 140px;
+      height: 140px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .score-text {
+      font-size: 42px;
+      font-weight: bold;
+      color: #667eea;
+      z-index: 1;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 30px 40px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      border: 2px solid #e5e7eb;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .compliant { color: #10b981; }
+    .pending { color: #f59e0b; }
+    .critical { color: #ef4444; }
+    .patched { color: #8b5cf6; }
+
+    .hosts-section {
+      padding: 30px 40px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #1f2937;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .hosts-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .hosts-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .hosts-table th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hosts-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 14px;
+    }
+
+    .hosts-table tr:hover {
+      background: #f9fafb;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-compliant {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-critical {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-patched {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+
+    .update-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .update-badge {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .security-badge {
+      background: #fecaca;
+      color: #991b1b;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .footer {
+      background: #f9fafb;
+      padding: 30px 40px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .footer-info {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .hosts-table {
+        font-size: 12px;
+      }
+      
+      .hosts-table th,
+      .hosts-table td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🔒 {{ report_title }}</h1>
+      <p>Generated: {{ report_timestamp }}</p>
+    </div>
+
+    <!-- Compliance Score -->
+    <div class="compliance-score">
+      <h2 style="margin-bottom: 20px; color: #1f2937;">Overall Compliance Score</h2>
+      <div class="score-circle">
+        <div class="score-text">{{ compliance_percentage }}%</div>
+      </div>
+      <p style="color: #6b7280; font-size: 14px;">
+        {% if compliance_percentage | float >= 90 %}
+        ✅ Excellent security posture!
+        {% elif compliance_percentage | float >= 70 %}
+        🔶 Good compliance - some updates needed
+        {% else %}
+        🔴 Attention required - multiple systems need patching
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🖥️</div>
+        <div class="stat-value">{{ compliance_stats.total_hosts }}</div>
+        <div class="stat-label">Total Hosts</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value compliant">{{ compliance_stats.compliant_count }}</div>
+        <div class="stat-label">Compliant</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🔶</div>
+        <div class="stat-value pending">{{ compliance_stats.pending_count }}</div>
+        <div class="stat-label">Pending Updates</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-value critical">{{ compliance_stats.critical_count }}</div>
+        <div class="stat-label">Critical</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">✨</div>
+        <div class="stat-value patched">{{ compliance_stats.patched_count }}</div>
+        <div class="stat-label">Patched Today</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value" style="color: #6366f1;">{{ compliance_stats.total_updates_needed }}</div>
+        <div class="stat-label">Total Updates</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value" style="color: #dc2626;">{{ compliance_stats.total_security_updates }}</div>
+        <div class="stat-label">Security Updates</div>
+      </div>
+    </div>
+
+    <!-- Hosts Details -->
+    <div class="hosts-section">
+      <h2 class="section-title">📋 Host Details</h2>
+      <table class="hosts-table">
+        <thead>
+          <tr>
+            <th>Hostname</th>
+            <th>IP Address</th>
+            <th>OS Distribution</th>
+            <th>Status</th>
+            <th>Updates</th>
+            <th>Days Since Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for host in all_patch_metrics | sort(attribute='compliance_status') %}
+          <tr>
+            <td><strong>{{ host.hostname }}</strong></td>
+            <td>{{ host.ip_address }}</td>
+            <td>{{ host.os_distribution }}</td>
+            <td>
+              {% if host.compliance_status == 'compliant' %}
+              <span class="badge badge-compliant">✅ Compliant</span>
+              {% elif host.compliance_status == 'pending' %}
+              <span class="badge badge-pending">🔶 Pending</span>
+              {% elif host.compliance_status == 'critical' %}
+              <span class="badge badge-critical">🔴 Critical</span>
+              {% elif host.compliance_status == 'patched' %}
+              <span class="badge badge-patched">✨ Patched</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="update-count">
+                {% if host.total_updates | int > 0 %}
+                <span class="update-badge">{{ host.total_updates }} total</span>
+                {% endif %}
+                {% if host.security_updates | int > 0 %}
+                <span class="security-badge">{{ host.security_updates }} security</span>
+                {% endif %}
+                {% if host.total_updates | int == 0 %}
+                <span style="color: #10b981;">✓ Up to date</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% if host.days_since_update == 'N/A' %}
+              <span style="color: #6b7280;">{{ host.days_since_update }}</span>
+              {% elif host.days_since_update | int > max_days_without_update %}
+              <span style="color: #ef4444; font-weight: 600;">{{ host.days_since_update }} days ⚠️</span>
+              {% else %}
+              <span style="color: #10b981;">{{ host.days_since_update }} days</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p><strong>Autopatch-Ansible</strong> - Automated Security Patch Compliance System</p>
+      <div class="footer-info">
+        <div class="footer-item">
+          <span>📅</span>
+          <span>Report Date: {{ report_date }}</span>
+        </div>
+        <div class="footer-item">
+          <span>⏰</span>
+          <span>Generated at: {{ report_time }}</span>
+        </div>
+        <div class="footer-item">
+          <span>🤖</span>
+          <span>Powered by Ansible</span>
+        </div>
+      </div>
+      <p style="margin-top: 15px; font-size: 11px;">
+        This report is automatically generated. For questions, contact your DevOps team.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
