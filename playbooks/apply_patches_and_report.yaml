@@ -4,8 +4,8 @@
   become: true
   gather_facts: true
   vars_files:
-    - /home/ubuntu/group_vars/all/vars.yml
-    - /home/ubuntu/group_vars/all/pass.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/vars.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/pass.yml
 
   tasks:
     - name: Display playbook start message
@@ -22,8 +22,8 @@
   gather_facts: false
   serial: 2
   vars_files:
-    - /home/ubuntu/group_vars/all/vars.yml
-    - /home/ubuntu/group_vars/all/pass.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/vars.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/pass.yml
 
   tasks:
     - name: Show current patch status
@@ -54,8 +54,8 @@
   hosts: localhost
   gather_facts: true
   vars_files:
-    - /home/ubuntu/group_vars/all/vars.yml
-    - /home/ubuntu/group_vars/all/pass.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/vars.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/pass.yml
 
   tasks:
     - name: Include report role
