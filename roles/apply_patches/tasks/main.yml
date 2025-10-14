@@ -69,6 +69,3 @@
       Patches Applied: {{ patch_metrics.patches_applied | default(false) }}
       Reboot Performed: {{ patch_metrics.reboot_performed | default(false) }}
       New Status: {{ patch_metrics.compliance_status | upper }}
-#SPDX-License-Identifier: MIT-0
----
-# tasks file for apply_patches
