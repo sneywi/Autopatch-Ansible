@@ -4,8 +4,8 @@
   become: true
   gather_facts: true
   vars_files:
-    - /home/ubuntu/group_vars/all/vars.yml
-    - /home/ubuntu/group_vars/all/pass.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/vars.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/pass.yml
 
   tasks:
     - name: Display playbook start message
@@ -19,8 +19,8 @@
 - name: Generate and send compliance report
   hosts: localhost
   vars_files:
-    - /home/ubuntu/group_vars/all/vars.yml
-    - /home/ubuntu/group_vars/all/pass.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/vars.yml
+    - /home/ubuntu/Autopatch-Ansible/group_vars/all/pass.yml
   gather_facts: true
   vars:
     report_title: "Security Patch Compliance Report"
