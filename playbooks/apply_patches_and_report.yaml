@@ -17,7 +17,7 @@
         name: check_updates
 
 - name: Apply patches to systems requiring updates
-  hosts: env_Dev
+  hosts: env_Development
   become: true
   gather_facts: false
   serial: 2
