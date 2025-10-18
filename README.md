@@ -63,37 +63,36 @@ Autopatch-Ansible transforms patch management into an automated, reliable workfl
 
 ## How to Use This Repo
 
-1. Clone the repository
+Step 1: Clone the repository
 ```bash
 git clone https://github.com/sneywi/Autopatch-Ansible.git
 cd Autopatch-Ansible
 ```
-2. Configure AWS credentials
+Step 2: Configure AWS credentials
 ```bash
 aws configure
 ```
-3. Edit your .pem file
+Step 3: Edit your .pem file
 ```bash
 vi ansible-key.pem
 ```
-4. Edit your ansible-vault credentials
+Step 4: Edit your ansible-vault credentials
 ```bash
 ansible-vault edit group_vars/all/pass.yml
 ```
-5. Create a new SSH keypair
+Step 5: Create a new SSH keypair
 ```bash
 ssh-keygen -t rsa -b 4096
 ```
-After creating 'n' number of manage/target nodes:
-6. Name them sequentially
+Step 6: After creating 'n' number of manage/target nodes, name them sequentially:
 ```bash
 ./tagging.sh
 ```
-7. Setup Passwordless SSH to All Managed Nodes
+Step 7: Setup Passwordless SSH to All Managed Nodes
 ```bash
 ./copy-public-key.sh
 ```
-8. Execute your playbook!
+Step 8: Execute your playbook!
 ```bash
 ansible-playbook playbooks/execute_playbook.yaml
 ```
