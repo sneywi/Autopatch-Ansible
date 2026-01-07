@@ -1,23 +1,24 @@
-# Autopatch-Ansible 🔁
+# Autopatch-Ansible ↳↰
 
 **Automated security patch compliance system for AWS EC2 instances**
 
 Autopatch-Ansible scans AWS EC2 instances, identifies pending updates, applies critical patches, and generates HTML compliance reports - all without manual intervention.
 
----
-
 ## The Problem
 
 Managing patches manually across multiple servers is:
-- ⏱️ **Time-consuming** - Hours spent SSH-ing into servers
-- ❌ **Error-prone** - Easy to miss critical updates
-- 📊 **Poor visibility** - No centralized compliance view
-- 📝 **Inconsistent** - Manual documentation becomes outdated
-- ⚠️ **High risk** - One forgotten server = security breach
 
----
+➜ **Time-consuming** - Hours spent SSH-ing into servers
 
-## The Solution
+➜ **Error-prone** - Easy to miss critical updates
+
+➜ **Poor visibility** - No centralized compliance view
+
+➜ **Inconsistent** - Manual documentation becomes outdated
+
+➜ **High risk** - One forgotten server = security breach
+
+## ✰ The Solution
 
 Autopatch-Ansible transforms patch management into an automated, reliable workflow.
 
@@ -31,14 +32,12 @@ Autopatch-Ansible transforms patch management into an automated, reliable workfl
 
 ### Key Benefits
 
-✅ **Save 95% of time** - From hours to minutes  
-✅ **Zero human errors** - Consistent, repeatable process  
-✅ **Complete visibility** - Real-time compliance metrics  
-✅ **Automatic documentation** - Every run is logged  
-✅ **Risk reduction** - Serial execution prevents mass outages  
-✅ **Scalable** - Works for 10 or 1,000 servers  
-
----
+⟡ **Save 95% of time** - From hours to minutes  
+⟡ **Zero human errors** - Consistent, repeatable process  
+⟡ **Complete visibility** - Real-time compliance metrics  
+⟡ **Automatic documentation** - Every run is logged  
+⟡ **Risk reduction** - Serial execution prevents mass outages  
+⟡ **Scalable** - Works for 10 or 1,000 servers  
 
 ## Features
 
@@ -48,8 +47,6 @@ Autopatch-Ansible transforms patch management into an automated, reliable workfl
 - **Jinja2 Templates** - Professional HTML reports
 - **Email Automation** - Compliance summaries (0% → 100%)
 
----
-
 ## Prerequisites
 
 - AWS CLI
@@ -58,8 +55,6 @@ Autopatch-Ansible transforms patch management into an automated, reliable workfl
 - Ansible
 - boto3
 - AWS Ansible collection
-
----
 
 ## How to Use This Repo
 
@@ -96,7 +91,6 @@ Step 8: Execute your playbook!
 ```bash
 ansible-playbook playbooks/execute_playbook.yaml
 ```
----
 
 ## Email Reports
 
@@ -116,13 +110,9 @@ The system sends two automated emails:
 <img width="1919" height="1079" alt="5" src="https://github.com/user-attachments/assets/74fc70cb-cfa9-4a22-8f5c-28187d70d0a3" />
 <img width="1919" height="1079" alt="6" src="https://github.com/user-attachments/assets/e235997d-a574-4894-a5fc-5fec18001545" />
 
----
-
 ## Documentation
 
 Full technical breakdown: [Hashnode Article](https://iacverse.hashnode.dev/autopatch-ansible-building-an-automated-security-patch-compliance-system-with-ansible-and-aws)
-
----
 
 ## Author
 
